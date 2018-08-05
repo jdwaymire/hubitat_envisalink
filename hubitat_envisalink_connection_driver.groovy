@@ -167,6 +167,7 @@ def StatusReport(){
 
 def strobe(){
  	log.debug "Stobe : NOT IMPLEMENTED"   
+    def allDevices =  getChildDevices()
 }
 
 def ToggleTimeStamp(){
@@ -185,12 +186,16 @@ def ToggleTimeStamp(){
 //actions
 def createZone(zoneInfo){
     log.debug "Creating ${zoneInfo.zoneName} with deviceNetworkId = ${zoneInfo.deviceNetworkId}"
+    def newDevice
     if (zoneInfo.zoneType == 0)
     {
-    	def newContact = addChildDevice("hubitat", "Virtual Contact Sensor", zoneInfo.deviceNetworkId, [name: zoneInfo.zoneName, isComponent: true, label: zoneInfo.zoneName])
+    	addChildDevice("hubitat", "Virtual Contact Sensor", zoneInfo.deviceNetworkId, [name: zoneInfo.zoneName, isComponent: true, label: zoneInfo.zoneName])
     } else {
-     	def newContact = addChildDevice("hubitat", "Virtual Motion Sensor", zoneInfo.deviceNetworkId, [name: zoneInfo.zoneName, isComponent: true, label: zoneInfo.zoneName])   
+     	addChildDevice("hubitat", "Virtual Motion Sensor", zoneInfo.deviceNetworkId, [name: zoneInfo.zoneName, isComponent: true, label: zoneInfo.zoneName])   
+        newDevice = getChildDevice(zoneInfo.deviceNetworkId)
+        newDevice.updateSetting("autoInactive",[type:"enum", value:0])
     }
+    
 }
 
 def removeZone(zoneInfo){
@@ -263,14 +268,17 @@ def zoneOpen(message){
     def zoneDevice
     def substringCount = message.size() - 3
     zoneDevice = getChildDevice("${device.deviceNetworkId}_${message.substring(substringCount).take(3)}")
+    if (zoneDevice == null){
+        zoneDevice = getChildDevice("${device.deviceNetworkId}_M_${message.substring(substringCount).take(3)}")
+    }
     log.debug zoneDevice
     if (zoneDevice){
-        if (zoneDevice.capabilities.find { it.name > "Contact Sensor"}){
+        if (zoneDevice.capabilities.find { item -> item.name.startsWith('Contact')}){
             log.debug "Contact Open"
             zoneDevice.open()
          }else {
             log.debug "Motion Active"
-            zoneDevice.inactive()
+            zoneDevice.active()
         }
     }
     
@@ -280,14 +288,17 @@ def zoneClosed(message){
     def zoneDevice
     def substringCount = message.size() - 3
     zoneDevice = getChildDevice("${device.deviceNetworkId}_${message.substring(substringCount).take(3)}")
+    if (zoneDevice == null){
+        zoneDevice = getChildDevice("${device.deviceNetworkId}_M_${message.substring(substringCount).take(3)}")
+    }
     if (zoneDevice){
     	log.debug zoneDevice
-        if (zoneDevice.capabilities.find { it.name > "Contact Sensor"}){
+        if (zoneDevice.capabilities.find { item -> item.name.startsWith('Contact')}){
 	     	log.debug "Contact Closed"
     		zoneDevice.close()
         }else {
             log.debug "Motion Inactive"
-            zoneDevice.active()
+            zoneDevice.inactive()
         }
     }
 }

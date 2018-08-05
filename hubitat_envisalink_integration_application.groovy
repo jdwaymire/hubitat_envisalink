@@ -66,10 +66,10 @@ def mainPage() {
             }
         }
         else {
-             state.enableSMH = enableSMH
+             state.enableHSM = enableHSM
                 section("<h3>Safety Monitor</h3>") {
                     paragraph "Enabling Hubitat Safety Monitor Integration will tie your Envisalink state to the state of HSM.  Your Envisalink will receive the Arm Away, Arm Home and Disarm commands based on the HSM state. " 
-                        input "enableSMH", "bool", title: "Enable SMH Integration", required: false, multiple: false, defaultValue: true, submitOnChange: true
+                        input "enableHSM", "bool", title: "Enable HSM Integration", required: false, multiple: false, defaultValue: true, submitOnChange: true
                }
 
         
@@ -275,7 +275,7 @@ def uninstalled() {
 def statusHandler(evt) {
     log.info "HSM Alert: $evt.value" + (evt.value == "rule" ? ",  $evt.descriptionText" : "")
     
-    if (evt.value && state.enableSMH)
+    if (evt.value && state.enableHSM)
     {
 
         switch(evt.value){

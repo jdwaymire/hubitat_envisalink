@@ -168,7 +168,7 @@ def defineZoneMap() {
             paragraph "Create a Map for a zone in Envisalink"
            	input "zoneName", "text", title: "Zone Name", required: true, multiple: false, defaultValue: "Zone x", submitOnChange: false
             input "zoneNumber", "number", title: "Which Zone 1-64", required: true, multiple: false, defaultValue: 001, range: "1..64", submitOnChange: false
-            input "zoneType", "enum", title: "Motion or Contact Sensor?", required: true, multiple: false, defaultValue: 7, 
+            input "zoneType", "enum", title: "Motion or Contact Sensor?", required: true, multiple: false, 
                 options: [[0:"Contact"],[1:"Motion"]]
         }
 	}
@@ -177,22 +177,30 @@ def defineZoneMap() {
 def editZoneMapPage(message) {
     log.debug "Showing editZoneMapPage"
     log.debug "editing ${message.deviceNetworkId}"
+    state.allZones = getChildDevice(state.EnvisalinkDNI).getChildDevices()
     def zoneDevice = getChildDevice(state.EnvisalinkDNI).getChildDevice(message.deviceNetworkId)
     def paragraphText = ""
     //Maybe Editing and Deleting coming soon
     //state.editingZone = true;
     state.editedZoneDNI = message.deviceNetworkId;
-    if (zoneDevice.capabilities.find { it.name > "Contact Sensor"}){
-        paragraphText = paragraphText + "Contact Sensor\n"
-    } 
-    if (zoneDevice.capabilities.find { it.name > "Motion Sensor"}){
+    if (zoneDevice.capabilities.find { item -> item.name.startsWith('Motion')}){
         paragraphText = paragraphText + "Motion Sensor\n"
+    } 
+    if (zoneDevice.capabilities.find { item -> item.name.startsWith('Contact')}){
+        paragraphText = paragraphText + "Contact Sensor\n"
     } 
     dynamicPage(name: "editZoneMapPage", title: ""){
         section("<h1>${zoneDevice.label}</h1>"){
             paragraph paragraphText
         }
+        /*
+        section("<h2>Delete this Zone", title: ""){
+         	input "deleteZoneBool", "bool", title: "Are you sure?", required: false, multiple: false, submitOnChange: true
+        }
+		*/
     }
+    
+    
 }
 
 def clearStateVariables(){
@@ -235,9 +243,15 @@ def castEnvisalinkDeviceStates(){
 }
 
 def createZone(){
-	log.debug "Starting validation of ${zoneName}"
+    log.debug "Starting validation of ${zoneName} ZoneType: ${zoneType}"
     String formatted = String.format("%03d", zoneNumber)
-    String deviceNetworkId = state.EnvisalinkDNI + "_" + formatted
+    String deviceNetworkId
+    
+    if (zoneType == "0"){
+	    deviceNetworkId = state.EnvisalinkDNI + "_" + formatted
+    }else{
+        deviceNetworkId = state.EnvisalinkDNI + "_M_" + formatted
+    }
     log.debug "Entered zoneNumber: ${zoneNumber} formatted as: ${formatted}"
     getChildDevice(state.EnvisalinkDNI).createZone([zoneName: zoneName, deviceNetworkId: deviceNetworkId, zoneType: zoneType])
     state.creatingZone = false;
@@ -262,6 +276,8 @@ def installed() {
 }
 
 def updated() {
+    
+    
 	unsubscribe()
 	initialize()
 }

@@ -26,6 +26,9 @@ public static String version()      {  return "v0.10.0"  }
 private static boolean isDebug()    {  return true  }
 
 /***********************************************************************************************************************
+* Version: 0.11.0
+*	Added Motion Zone Capability
+*
 * Version: 0.10.0
 * 
 * 	Just the basics. 
@@ -115,11 +118,21 @@ def zoneMapsPage() {
     {
         createZone()
     }
-        
+    /* Maybe coming soon?
     if (state.editingZone)
     {
      	editZone()   
     }
+	
+    log.debug "DeleteZone? ${state.deleteZone}"
+    if (state.deleteZone == true){
+        section("Deleted Zone"){
+            paragraph "Deleted your Zone"
+            state.deleteZone == false
+        }
+        
+    }
+	*/
     
 	dynamicPage(name: "zoneMapsPage", title: "", install: true, uninstall: false){
        
@@ -128,8 +141,6 @@ def zoneMapsPage() {
             paragraph "You'll want to determine the Zone number as it is defined in " +
                 "your Envisalink setup.  Define a new Zone in Envisalink Itegration and the application will then create a Virtual Contact sensor component device, which will report the state of the Envisalink Zone to which it is mapped. " +  
                 " The Virtual Contact sensor components can be used in Rule Machine or any other application that is capable of leveraging the contact capability.  Envisalink is capable of 64 zones, your zone map should correspond to the numeric representation of that zone."
-            	
-            
         }
         section("Create a Zone Map") {
             href (name: "createZoneMapPage", title: "Create a Zone Map", 
@@ -137,31 +148,15 @@ def zoneMapsPage() {
             page: "defineZoneMap")	
         }
         
-/* 
-			Maybe allow editing of zone names later
-			getChildDevice(state.EnvisalinkDNI).getChildDevices().each{
-                
-                
-                href (name: "editZoneMapPage", title: "${it.label}", 
-                description: "Edit the name of the Zone",
-                params: [deviceNetworkId: it.deviceNetworkId],
-                page: "editZoneMapPage")	
-			
-            }	
-*/
-        
        section("<h2>Existing Zones</h2>"){
        		def deviceList = ""
-            
-
-           	getChildDevice(state.EnvisalinkDNI).getChildDevices().each{
-                deviceList = deviceList + "${it.label}\n"
-       		}
-            
-            paragraph deviceList        
+            getChildDevice(state.EnvisalinkDNI).getChildDevices().each{
+                href (name: "editZoneMapPage", title: "${it.label}", 
+                description: "Zone Details",
+                params: [deviceNetworkId: it.deviceNetworkId],
+                page: "editZoneMapPage")	
+            }	
 		}
-                
-       
 	}
 }
 
@@ -173,6 +168,8 @@ def defineZoneMap() {
             paragraph "Create a Map for a zone in Envisalink"
            	input "zoneName", "text", title: "Zone Name", required: true, multiple: false, defaultValue: "Zone x", submitOnChange: false
             input "zoneNumber", "number", title: "Which Zone 1-64", required: true, multiple: false, defaultValue: 001, range: "1..64", submitOnChange: false
+            input "zoneType", "enum", title: "Motion or Contact Sensor?", required: true, multiple: false, defaultValue: 7, 
+                options: [[0:"Contact"],[1:"Motion"]]
         }
 	}
 }
@@ -181,14 +178,21 @@ def editZoneMapPage(message) {
     log.debug "Showing editZoneMapPage"
     log.debug "editing ${message.deviceNetworkId}"
     def zoneDevice = getChildDevice(state.EnvisalinkDNI).getChildDevice(message.deviceNetworkId)
-    state.editingZone = true;
+    def paragraphText = ""
+    //Maybe Editing and Deleting coming soon
+    //state.editingZone = true;
     state.editedZoneDNI = message.deviceNetworkId;
-	dynamicPage(name: "editZoneMapPage", title: ""){
-        section("<h1>Create a Zone Map</h1>"){
-            paragraph "Edit the name of this existing Zone"
-           	input "newZoneName", "text", title: "Zone Name", required: true, multiple: false, defaultValue: "${zoneDevice.label}", submitOnChange: false
+    if (zoneDevice.capabilities.find { it.name > "Contact Sensor"}){
+        paragraphText = paragraphText + "Contact Sensor\n"
+    } 
+    if (zoneDevice.capabilities.find { it.name > "Motion Sensor"}){
+        paragraphText = paragraphText + "Motion Sensor\n"
+    } 
+    dynamicPage(name: "editZoneMapPage", title: ""){
+        section("<h1>${zoneDevice.label}</h1>"){
+            paragraph paragraphText
         }
-	}
+    }
 }
 
 def clearStateVariables(){
@@ -235,8 +239,7 @@ def createZone(){
     String formatted = String.format("%03d", zoneNumber)
     String deviceNetworkId = state.EnvisalinkDNI + "_" + formatted
     log.debug "Entered zoneNumber: ${zoneNumber} formatted as: ${formatted}"
-    //state.EnvisalinkDevice.createZone([name: zoneName, deviceNetworkId: deviceNetworkId])
-    getChildDevice(state.EnvisalinkDNI).createZone([zoneName: zoneName, deviceNetworkId: deviceNetworkId])
+    getChildDevice(state.EnvisalinkDNI).createZone([zoneName: zoneName, deviceNetworkId: deviceNetworkId, zoneType: zoneType])
     state.creatingZone = false;
 }
 

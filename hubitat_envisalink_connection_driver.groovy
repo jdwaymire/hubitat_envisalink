@@ -29,6 +29,9 @@ public static String version()      {  return "v0.10.0"  }
 private static boolean isDebug()    {  return true  }
 
 /***********************************************************************************************************************
+* Version: 0.11.0
+*	Added Motion Zone Capability
+*
 * Version: 0.10.0
 * 
 * 	Just the basics. 
@@ -182,7 +185,17 @@ def ToggleTimeStamp(){
 //actions
 def createZone(zoneInfo){
     log.debug "Creating ${zoneInfo.zoneName} with deviceNetworkId = ${zoneInfo.deviceNetworkId}"
-    def newContact = addChildDevice("hubitat", "Virtual Contact Sensor", zoneInfo.deviceNetworkId, [name: zoneInfo.zoneName, isComponent: true, label: zoneInfo.zoneName])
+    if (zoneInfo.zoneType == 0)
+    {
+    	def newContact = addChildDevice("hubitat", "Virtual Contact Sensor", zoneInfo.deviceNetworkId, [name: zoneInfo.zoneName, isComponent: true, label: zoneInfo.zoneName])
+    } else {
+     	def newContact = addChildDevice("hubitat", "Virtual Motion Sensor", zoneInfo.deviceNetworkId, [name: zoneInfo.zoneName, isComponent: true, label: zoneInfo.zoneName])   
+    }
+}
+
+def removeZone(zoneInfo){
+    log.debug "Removing ${zoneInfo.zoneName} with deviceNetworkId = ${zoneInfo.deviceNetworkId}"
+    deleteChildDevice(zoneInfo.deviceNetworkId)
 }
 
 private parse(String message) {

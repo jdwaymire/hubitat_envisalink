@@ -292,19 +292,22 @@ def uninstalled() {
 }
 
 def statusHandler(evt) {
-    log.info "HSM Alert: $evt.value" + (evt.value == "rule" ? ",  $evt.descriptionText" : "")
+    log.info "HSM Alert: $evt.value"
     
     if (evt.value && state.enableHSM)
     {
-
+		log.debug "HSM is enabled"
         switch(evt.value){
          	case "armedAway":
+            log.debug  "Sending Arm Away"
             	getChildDevice(state.EnvisalinkDNI).ArmAway()
             	break
             case "armedHome":
+            log.debug  "Sending Arm Home"
             	getChildDevice(state.EnvisalinkDNI).ArmHome()
             	break
             case "disarmed":
+            log.debug  "Sending Disarm"
             	getChildDevice(state.EnvisalinkDNI).Disarm()
             	break
         }

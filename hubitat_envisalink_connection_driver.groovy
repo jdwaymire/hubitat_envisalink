@@ -29,6 +29,12 @@ public static String version()      {  return "v0.10.0"  }
 private static boolean isDebug()    {  return true  }
 
 /***********************************************************************************************************************
+*
+* Version: 0.12.1
+*	Spelling Error
+* Version: 0.12.0
+*	Small State Fix for Motion
+*
 * Version: 0.11.0
 *	Added Motion Zone Capability
 *
@@ -71,6 +77,7 @@ metadata {
         command "ChimeToggle"
         command "ToggleTimeStamp"
         
+        
         attribute   "Status", "string"
 	}
 
@@ -85,11 +92,14 @@ metadata {
 def installed() {
 	log.warn "installed..."
     initialize()
+    
+    
    }
 
 def updated() {
 	log.info "updated..."
     log.debug "Configuring IP: ${ip}, Code: ${code}, Password: ${passwd}"
+    
 	initialize()
 }
 
@@ -221,22 +231,22 @@ private parse(String message) {
          zoneClosed(message)
     }
      if(message.startsWith("650")) {
-        sendEvent(name:"Status", value: "Partion Ready", displayed:false, isStateChange: true)
+        sendEvent(name:"Status", value: "Ready", displayed:false, isStateChange: true)
     }
     if(message.startsWith("651")) {
-        sendEvent(name:"Status", value: "Partion NOT Ready", displayed:false, isStateChange: true)
+        sendEvent(name:"Status", value: "NOT Ready", displayed:false, isStateChange: true)
     }
     if(message.startsWith("652")) {
-        sendEvent(name:"Status", value: "Partion Armed", displayed:false, isStateChange: true)
+        sendEvent(name:"Status", value: "Armed", displayed:false, isStateChange: true)
     }
     if(message.startsWith("653")) {
-        sendEvent(name:"Status", value: "Partition Ready - Force Arming Enabled", displayed:false, isStateChange: true)
+        sendEvent(name:"Status", value: "Ready - Force Arming Enabled", displayed:false, isStateChange: true)
     }
     if(message.startsWith("654")) {
-        sendEvent(name:"Status", value: "Partion In Alarm", displayed:false, isStateChange: true)
+        sendEvent(name:"Status", value: "In Alarm", displayed:false, isStateChange: true)
     }
     if(message.startsWith("655")) {
-        sendEvent(name:"Status", value: "Partion Disarmed", displayed:false, isStateChange: true)
+        sendEvent(name:"Status", value: "Disarmed", displayed:false, isStateChange: true)
     }   
     if(message.startsWith("656")) {
         sendEvent(name:"Status", value: "Exit Delay in Progress", displayed:false, isStateChange: true)

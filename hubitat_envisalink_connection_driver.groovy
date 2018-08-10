@@ -22,12 +22,10 @@
 *
 *	Special Thanks to Chuck Swchwer, Mike Maxwell and cuboy29 
 *	and to the entire Hubitat staff, you guys are killing it!
-*
-**************************************************************
-**********	See Release Notes at the bottom ******************
+*	See Release Notes at the bottom
 ***********************************************************************************************************************/
 
-public static String version()      {  return "v0.13.0"  }
+public static String version()      {  return "v0.13.1"  }
 def boolean isDebug
 
 
@@ -169,9 +167,9 @@ def ToggleTimeStamp(){
 
 //actions
 def createZone(zoneInfo){
-    log.info "Creating ${zoneInfo.zoneName} with deviceNetworkId = ${zoneInfo.deviceNetworkId}"
+    log.info "Creating ${zoneInfo.zoneName} with deviceNetworkId = ${zoneInfo.deviceNetworkId} of type: ${zoneInfo.zoneType}"
     def newDevice
-    if (zoneInfo.zoneType == 0)
+    if (zoneInfo.zoneType == "0")
     {
     	addChildDevice("hubitat", "Virtual Contact Sensor", zoneInfo.deviceNetworkId, [name: zoneInfo.zoneName, isComponent: true, label: zoneInfo.zoneName])
     } else {
@@ -479,6 +477,8 @@ private ifDebug(msg)
 ]
 
 /***********************************************************************************************************************
+* Version: 0.13.0
+*	Fixed Zone Type Conversion (Always setting up Motion Sensor)
 * Version: 0.13.0
 *	Adding debug switch for reducing logging
 *	Move this section to the bottom of the file

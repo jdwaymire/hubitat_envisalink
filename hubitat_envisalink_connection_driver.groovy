@@ -23,39 +23,13 @@
 *	Special Thanks to Chuck Swchwer, Mike Maxwell and cuboy29 
 *	and to the entire Hubitat staff, you guys are killing it!
 *
+**************************************************************
+**********	See Release Notes at the bottom ******************
 ***********************************************************************************************************************/
 
-public static String version()      {  return "v0.10.0"  }
-private static boolean isDebug()    {  return true  }
+public static String version()      {  return "v0.13.0"  }
+def boolean isDebug
 
-/***********************************************************************************************************************
-*
-* Version: 0.12.1
-*	Spelling Error
-* Version: 0.12.0
-*	Small State Fix for Motion
-*
-* Version: 0.11.0
-*	Added Motion Zone Capability
-*
-* Version: 0.10.0
-* 
-* 	Just the basics. 
-*		Establish Telnet with Envisalink
-* 		Interpret Incoming Messages from Envisalink
-*		Arm Away
-*		Arm Home
-*	 	Disarm
-* 		Switch to Arm Away and Disarm
-*	 	Status Report
-*		Toggle Chime
-*		Toggle Timestamp
-*	 	Send Raw Message
-*		Create Child Virtual Contacts (Zones)
-*		Zone Open and Restored (Closed) Implementation
-*		Error Codes
-*		
-*/
 
 import groovy.transform.Field
 import java.util.regex.Matcher
@@ -113,7 +87,7 @@ def initialize() {
 		log.info "Telnet connection to Envisalink established"
         //poll()
 	} catch(e) {
-		log.debug "initialize error: ${e.message}"
+		log.warn "initialize error: ${e.message}"
 	}
 }
 
@@ -124,51 +98,51 @@ def uninstalled() {
 
 //envisalink calls
 def on(){
- 	log.debug "On"
+    ifDebug("On")
     ArmAway()
 }
 
 def off(){
- 	log.debug "Off"
+ 	ifDebug("Off")
     Disarm()
 }
 
 def ArmAway(){
-	log.debug "Arm Away"
+	ifDebug("Arm Away")
     def message = "0301"
     sendMsg(message)
 }
 
 def ArmHome(){
- 	log.debug "Arm Home"   
+ 	ifDebug("Arm Home")
     def message = "0311"
     sendMsg(message)
 }
 
 def both(){
-    log.debug "Both"   
+    ifDebug("Both")
  	siren()
     strobe()
 }
 
 def ChimeToggle(){
-	log.debug "Chime Toggle Command"
+	ifDebug("Chime Toggle Command")
     def message = "0711*4"
     sendMsg(message)
 }
 
 def Disarm(){
- 	log.debug "Disarm"   
+ 	ifDebug("Disarm")
     def message = "0401" + code
     sendMsg(message)
 }
 
 def SoundAlarm(){
- 	log.debug "Sound Alarm : NOT IMPLEMENTED"   
+ 	ifDebug("Sound Alarm : NOT IMPLEMENTED")
 }
 
 def siren(){
-	log.debug "Siren : NOT IMPLEMENTED"
+	ifDebug("Siren : NOT IMPLEMENTED")
 }
 
 def StatusReport(){
@@ -176,12 +150,12 @@ def StatusReport(){
 }
 
 def strobe(){
- 	log.debug "Stobe : NOT IMPLEMENTED"   
-    def allDevices =  getChildDevices()
+ 	ifDebug("Stobe : NOT IMPLEMENTED") 
+    //if allDevices =  getChildDevices()
 }
 
 def ToggleTimeStamp(){
-    log.debug "Toggle Time Stamp"   
+    ifDebug("Toggle Time Stamp")
     def message
     if (state.timeStampOn)
     {
@@ -195,7 +169,7 @@ def ToggleTimeStamp(){
 
 //actions
 def createZone(zoneInfo){
-    log.debug "Creating ${zoneInfo.zoneName} with deviceNetworkId = ${zoneInfo.deviceNetworkId}"
+    log.info "Creating ${zoneInfo.zoneName} with deviceNetworkId = ${zoneInfo.deviceNetworkId}"
     def newDevice
     if (zoneInfo.zoneType == 0)
     {
@@ -209,14 +183,14 @@ def createZone(zoneInfo){
 }
 
 def removeZone(zoneInfo){
-    log.debug "Removing ${zoneInfo.zoneName} with deviceNetworkId = ${zoneInfo.deviceNetworkId}"
+    log.info "Removing ${zoneInfo.zoneName} with deviceNetworkId = ${zoneInfo.deviceNetworkId}"
     deleteChildDevice(zoneInfo.deviceNetworkId)
 }
 
 private parse(String message) {
-    log.debug "Parsing Incoming message: " + message
+    ifDebug("Parsing Incoming message: " + message)
     message = preProcessMessage(message)
-	log.debug "${tpiResponses[message.take(3) as int]}"
+	ifDebug("${tpiResponses[message.take(3) as int]}")
     
     if(message.startsWith("5053")) {
         sendLogin()
@@ -258,19 +232,16 @@ private parse(String message) {
         sendEvent(name:"Status", value: "Keypad Lock-out", displayed:false, isStateChange: true)
     }
     if(message.startsWith("5050")) {
-        
-        log.debug "Password provided was incorrect"
+        log.warn "Password provided was incorrect"
     }
     if(message.startsWith("5051")) {
-        
-        log.debug "Loging Succesfull"
+        ifDebug("Loging Succesfull")
     }
     if(message.startsWith("5052")) {
-        
-        log.debug "Time out.  You did not send password within 10 seconds"
+        log.warn "Time out.  You did not send password within 10 seconds"
     }
     if(message.startsWith("502020")) {
-        log.debug "API Command Syntax Error"
+        ifDebug("API Command Syntax Error")
     }
 }
 
@@ -284,10 +255,10 @@ def zoneOpen(message){
     log.debug zoneDevice
     if (zoneDevice){
         if (zoneDevice.capabilities.find { item -> item.name.startsWith('Contact')}){
-            log.debug "Contact Open"
+            ifDebug("Contact Open")
             zoneDevice.open()
          }else {
-            log.debug "Motion Active"
+            ifDebug("Motion Active")
             zoneDevice.active()
         }
     }
@@ -302,12 +273,12 @@ def zoneClosed(message){
         zoneDevice = getChildDevice("${device.deviceNetworkId}_M_${message.substring(substringCount).take(3)}")
     }
     if (zoneDevice){
-    	log.debug zoneDevice
+    	ifDebug(zoneDevice)
         if (zoneDevice.capabilities.find { item -> item.name.startsWith('Contact')}){
-	     	log.debug "Contact Closed"
+	     	ifDebug("Contact Closed")
     		zoneDevice.close()
         }else {
-            log.debug "Motion Inactive"
+            ifDebug("Motion Inactive")
             zoneDevice.inactive()
         }
     }
@@ -323,14 +294,14 @@ def systemError(message){
 //helpers
 private checkTimeStamp(message){
     if (timeStampPattern.matcher(message)){
-        log.debug "Time Stamp Found"
+        ifDebug("Time Stamp Found")
         	state.timeStampOn = true;
         	message = message.replaceAll(timeStampPattern, "")
-        	log.debug "Time Stamp Remove ${message}"
+        	ifDebug("Time Stamp Remove ${message}")
         }
         else{
             state.timeStampOn = false;
-        	log.debug "Time Stamp Not Found"
+        	ifDebug("Time Stamp Not Found")
         }
     return message
 }
@@ -348,11 +319,11 @@ private generateChksum(String cmdToSend){
 }
 
 private preProcessMessage(message){
-    log.debug "Preprocessing Message"
+    ifDebug("Preprocessing Message")
  	message = checkTimeStamp(message)
     //strip checksum
     message = message.take(message.size() - 2)
-    log.debug "Stripping Checksum: ${message}"
+    ifDebug("Stripping Checksum: ${message}")
     return message
 }
 
@@ -378,7 +349,7 @@ private sendLogin(){
 
 def sendMsg(String s) {
     s = generateChksum(s)
-    log.debug s
+    ifDebug(s)
 	return new hubitat.device.HubAction(s, hubitat.device.Protocol.TELNET)
 }
 
@@ -391,7 +362,7 @@ def getReTry(Boolean inc){
 }
 
 def telnetStatus(String status){
-	log.info "telnetStatus- error: ${status}"
+	log.warn "telnetStatus- error: ${status}"
 	if (status != "receive error: Stream is closed"){
 		getReTry(true)
 		log.error "Telnet connection dropped..."
@@ -401,7 +372,10 @@ def telnetStatus(String status){
 	}
 }
 
-
+private ifDebug(msg)     
+{  
+    if (msg && isDebug)  log.debug 'Envisalink Integration: ' + msg  
+}
 
 @Field Pattern timeStampPattern = ~/^\d{2}:\d{2}:\d{2} /   
 
@@ -503,3 +477,35 @@ def telnetStatus(String status){
     921: "Master Code Required",
     922: "Installers Code Required"
 ]
+
+/***********************************************************************************************************************
+* Version: 0.13.0
+*	Adding debug switch for reducing logging
+*	Move this section to the bottom of the file
+*
+* Version: 0.12.1
+*	Spelling Error
+* Version: 0.12.0
+*	Small State Fix for Motion
+*
+Version: 0.11.0
+*	Added Motion Zone Capability
+*
+* Version: 0.10.0
+* 
+* 	Just the basics. 
+*		Establish Telnet with Envisalink
+* 		Interpret Incoming Messages from Envisalink
+*		Arm Away
+*		Arm Home
+*	 	Disarm
+* 		Switch to Arm Away and Disarm
+*	 	Status Report
+*		Toggle Chime
+*		Toggle Timestamp
+*	 	Send Raw Message
+*		Create Child Virtual Contacts (Zones)
+*		Zone Open and Restored (Closed) Implementation
+*		Error Codes
+*		
+*/

@@ -20,8 +20,6 @@ _At this time, I only support a single partition configuration._
 2. Add Application Code and Load Envisalink Integration application
 3. Using the Envisalink Integration application, configure your IP, Password and Code to Envisalink and your Zone layout
 
-v.0.13
-https://github.com/omayhemo/hubitat_envisalink
 
 > KNOWN ISSUES
 

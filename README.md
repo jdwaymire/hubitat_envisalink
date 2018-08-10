@@ -1,5 +1,5 @@
 # Hubitat Envisalink Integration
-Hubitat Envisalink Connection driver and Integration application, provides integration with Envisalink
+Hubitat Envisalink Connection driver and Integration application, provides integration with Envisalink.  
 Visit http://www.eyezon.com/ for more information on Envisalink.
 
 **Prerequisites**

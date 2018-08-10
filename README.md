@@ -23,13 +23,6 @@ _At this time, I only support a single partition configuration._
 v.0.13
 https://github.com/omayhemo/hubitat_envisalink
 
-> RELEASE NOTES
-
-**`v0.13.1 Driver Release`**
-
-* Fix Installation of Zones as wrong Type
-
-
 > KNOWN ISSUES
 
 * If the HSM system is armed and disarmed very quickly in response to events, sometimes Envisalink continues to execute the Arm command and seemingly loses the disarm command.

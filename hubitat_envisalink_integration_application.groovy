@@ -20,21 +20,13 @@
 *  Name: Envisalink Integration
 *  https://github.com/omayhemo/hubitat_envisalink
 *
+**************************************************************
+**********	See Release Notes at the bottom ******************
 ***********************************************************************************************************************/
 
-public static String version()      {  return "v0.10.0"  }
-private static boolean isDebug()    {  return true  }
+public static String version()      {  return "v0.13.0"  }
+def boolean isDebug
 
-/***********************************************************************************************************************
-* Version: 0.11.0
-*	Added Motion Zone Capability
-*
-* Version: 0.10.0
-* 
-* 	Just the basics. 
-*		Creates the Envisalink Connection device and allows definition of Zone Maps, creating virtual contact sensors as child components.
-*		Allows subscription to HSM to mirror the state of HSM to Envisalink (ArmAway, ArmHome, Disarm)
-*/
 definition(
     name: "Envisalink Integration",
     namespace: "dwb",
@@ -55,9 +47,11 @@ preferences {
     page(name: "aboutPage", nextPage: "mainPage")
 }
 
+
+
 //App Pages/Views
 def mainPage() {
-    log.debug "Showing mainPage"
+    ifDebug("Showing mainPage")
 	return dynamicPage(name: "mainPage", title: "", install: false, uninstall: true) {
         if(!state.envisalinkIntegrationInstalled && getChildDevices().size() == 0) {
             section("Define your Envisalink device") {
@@ -74,7 +68,8 @@ def mainPage() {
                     paragraph "Enabling Hubitat Safety Monitor Integration will tie your Envisalink state to the state of HSM.  Your Envisalink will receive the Arm Away, Arm Home and Disarm commands based on the HSM state. " 
                         input "enableHSM", "bool", title: "Enable HSM Integration", required: false, multiple: false, defaultValue: true, submitOnChange: true
                }
-
+            
+      
         
             
              section("") {
@@ -88,11 +83,15 @@ def mainPage() {
                   description: "Find out more about Envisalink Integration",
                   page: "aboutPage")	
         }
+        section("") {
+            input "isDebug", "bool", title: "Enable Debug Logging", required: false, multiple: false, defaultValue: true, submitOnChange: true
+        }
+
     }
 }
 
 def aboutPage() {
-    log.debug "Showing aboutPage"
+    ifDebug("Showing aboutPage")
     
 	dynamicPage(name: "aboutPage", title: none){
         section("<h1>Introducing Envisalink Integration</h1>"){
@@ -108,7 +107,7 @@ def aboutPage() {
 }
 
 def zoneMapsPage() {
-    log.debug "Showing zoneMapsPage"
+    ifDebug("Showing zoneMapsPage")
     if (getChildDevices().size() == 0 && !state.envisalinkIntegrationInstalled)
     {
         createEnvisalinkParentDevice()
@@ -124,7 +123,7 @@ def zoneMapsPage() {
      	editZone()   
     }
 	
-    log.debug "DeleteZone? ${state.deleteZone}"
+    ifDebug("DeleteZone? ${state.deleteZone}")
     if (state.deleteZone == true){
         section("Deleted Zone"){
             paragraph "Deleted your Zone"
@@ -161,7 +160,7 @@ def zoneMapsPage() {
 }
 
 def defineZoneMap() {
-    log.debug "Showing defineZoneMap"
+    ifDebug("Showing defineZoneMap")
     state.creatingZone = true;
 	dynamicPage(name: "defineZoneMap", title: ""){
         section("<h1>Create a Zone Map</h1>"){
@@ -175,8 +174,8 @@ def defineZoneMap() {
 }
 
 def editZoneMapPage(message) {
-    log.debug "Showing editZoneMapPage"
-    log.debug "editing ${message.deviceNetworkId}"
+    ifDebug("Showing editZoneMapPage")
+    ifDebug("editing ${message.deviceNetworkId}")
     state.allZones = getChildDevice(state.EnvisalinkDNI).getChildDevices()
     def zoneDevice = getChildDevice(state.EnvisalinkDNI).getChildDevice(message.deviceNetworkId)
     def paragraphText = ""
@@ -204,7 +203,7 @@ def editZoneMapPage(message) {
 }
 
 def clearStateVariables(){
-	log.debug "Clearing State Variables just in case."
+	ifDebug("Clearing State Variables just in case.")
     state.EnvisalinkDeviceName = null
     state.EnvisalinkIP = null
     state.EnvisalinkPassword = null
@@ -212,10 +211,10 @@ def clearStateVariables(){
 }
 
 def createEnvisalinkParentDevice(){
- 	log.debug "Creating Parent Envisalink Device"
+ 	ifDebug("Creating Parent Envisalink Device")
     if (getChildDevice(state.EnvisalinkDNI) == null){
         state.EnvisalinkDNI = UUID.randomUUID().toString()
-    	log.debug "Setting state.EnvisalinkDNI ${state.EnvisalinkDNI}"
+    	ifDebug("Setting state.EnvisalinkDNI ${state.EnvisalinkDNI}")
 	    addChildDevice("dwb", "Envisalink Connection", state.EnvisalinkDNI, null, [name: envisalinkName, isComponent: true, label: envisalinkName])
         getChildDevice(state.EnvisalinkDNI).updateSetting("ip",[type:"text", value:envisalinkIP])
     	getChildDevice(state.EnvisalinkDNI).updateSetting("passwd",[type:"text", value:envisalinkPassword])
@@ -225,25 +224,25 @@ def createEnvisalinkParentDevice(){
 }
 
 def castEnvisalinkDeviceStates(){
-  	log.debug "Casting to State Variables"
+  	ifDebug("Casting to State Variables")
     state.EnvisalinkDeviceName = envisalinkName
-    log.debug "Setting state.EnvisalinkDeviceName ${state.EnvisalinkDeviceName}"
+    ifDebug("Setting state.EnvisalinkDeviceName ${state.EnvisalinkDeviceName}")
     state.EnvisalinkIP = envisalinkIP
-    log.debug "Setting state.EnvisalinkIP ${state.EnvisalinkIP}"
+    ifDebug("Setting state.EnvisalinkIP ${state.EnvisalinkIP}")
     state.EnvisalinkPassword = envisalinkPassword
-    log.debug "Setting state.EnvisalinkPassword ${state.EnvisalinkPassword}"
+    ifDebug("Setting state.EnvisalinkPassword ${state.EnvisalinkPassword}")
     state.EnvisalinkCode = envisalinkCode
-    log.debug "Setting state.EnvisalinkCode ${state.EnvisalinkCode}"
+    ifDebug("Setting state.EnvisalinkCode ${state.EnvisalinkCode}")
     if (getChildDevice(state.EnvisalinkDNI)){
-        log.debug "Found a Child Envisalink ${getChildDevice(state.EnvisalinkDNI).label}"   
+        ifDebug("Found a Child Envisalink ${getChildDevice(state.EnvisalinkDNI).label}")
     }
     else{
-     	log.debug "Did not find a Parent Envisalink"   
+     	ifDebug("Did not find a Parent Envisalink")
     }
 }
 
 def createZone(){
-    log.debug "Starting validation of ${zoneName} ZoneType: ${zoneType}"
+    ifDebug("Starting validation of ${zoneName} ZoneType: ${zoneType}")
     String formatted = String.format("%03d", zoneNumber)
     String deviceNetworkId
     
@@ -252,15 +251,15 @@ def createZone(){
     }else{
         deviceNetworkId = state.EnvisalinkDNI + "_M_" + formatted
     }
-    log.debug "Entered zoneNumber: ${zoneNumber} formatted as: ${formatted}"
+    ifDebug("Entered zoneNumber: ${zoneNumber} formatted as: ${formatted}")
     getChildDevice(state.EnvisalinkDNI).createZone([zoneName: zoneName, deviceNetworkId: deviceNetworkId, zoneType: zoneType])
     state.creatingZone = false;
 }
 
 def editZone(){
     def childZone = getChildDevice(state.EnvisalinkDNI).getChildDevice(state.editedZoneDNI);
-	log.debug "Starting validation of ${childZone.label}"
-    log.debug "Attempting rename of zone to ${newZoneName}"
+	ifDebug("Starting validation of ${childZone.label}")
+    ifDebug("Attempting rename of zone to ${newZoneName}")
     childZone.updateSetting("label",[type:"text", value:newZoneName])
    	newZoneName = null;
     state.editingZone = false
@@ -268,6 +267,10 @@ def editZone(){
     
 }
 
+private ifDebug(msg)     
+{  
+    if (msg && isDebug)  log.debug 'Envisalink Integration: ' + msg  
+}
 
 //General App Events
 def installed() {
@@ -296,18 +299,18 @@ def statusHandler(evt) {
     
     if (evt.value && state.enableHSM)
     {
-		log.debug "HSM is enabled"
+		ifDebug("HSM is enabled")
         switch(evt.value){
          	case "armedAway":
-            log.debug  "Sending Arm Away"
+            ifDebug("Sending Arm Away")
             	getChildDevice(state.EnvisalinkDNI).ArmAway()
             	break
             case "armedHome":
-            log.debug  "Sending Arm Home"
+            ifDebug("Sending Arm Home")
             	getChildDevice(state.EnvisalinkDNI).ArmHome()
             	break
             case "disarmed":
-            log.debug  "Sending Disarm"
+            ifDebug("Sending Disarm")
             	getChildDevice(state.EnvisalinkDNI).Disarm()
             	break
         }
@@ -319,4 +322,21 @@ private removeChildDevices(delete) {
 }
 
 
+/***********************************************************************************************************************
+* Version: 0.13.0
+*	Provided Debug switch for less logging if desired.
+*	Moved this list to bottom of file
+*
+* Version: 0.12.1
+*	HSM Integration Changes
+*
+* Version: 0.11.0
+*	Added Motion Zone Capability
+*
+* Version: 0.10.0
+* 
+* 	Just the basics. 
+*		Creates the Envisalink Connection device and allows definition of Zone Maps, creating virtual contact sensors as child components.
+*		Allows subscription to HSM to mirror the state of HSM to Envisalink (ArmAway, ArmHome, Disarm)
+*/
 

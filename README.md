@@ -1,6 +1,6 @@
 # Hubitat Envisalink Integration
-Hubitat Envisalink Connection driver and Integration application, provides Hubitat integration with Envisalink.  
-Visit http://www.eyezon.com/ for more information on Envisalink.
+Hubitat Envisalink Connection driver and Integration application, provides Hubitat integration with Envisalink.
+Visit http://www.eyez-on.com/ for more information on Envisalink.
 
 **Prerequisites**
  - [Envisalink v3 or v4](www.eyez-on.com) 
@@ -10,6 +10,6 @@ Visit http://www.eyezon.com/ for more information on Envisalink.
 At this time, I only support a single partition configuration.
 
 ## Installation
- 1. Install and configure Envisalink Connection driver
- 2. Install Envisalink Integration application
- 3. Using the Envisalink Integration application, configure your Zone layout
+1. Install Envisalink Connection driver
+2. Add Application Code and Load Envisalink Integration application
+3. Using the Envisalink Integration application, configure your IP, Password and Code to Envisalink and your Zone layout

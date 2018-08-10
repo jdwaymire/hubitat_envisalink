@@ -33,12 +33,3 @@ https://github.com/omayhemo/hubitat_envisalink
 > KNOWN ISSUES
 
 * If the HSM system is armed and disarmed very quickly in response to events, sometimes Envisalink continues to execute the Arm command and seemingly loses the disarm command.
-
-.
-.
-.
-.
-_____________
-Why start a new topic, isn't this the same as another post I saw [Envisalink Integration](https://community.hubitat.com/t/envisalink-integration/3114/4)?
-
-_Not exactly.  cuboy29 has a different implementation for arming and disarming he implemented for the dashboards.  I've chosen to forgo the inclusion of child devices for Arm-Away, Arm-Home and Disarm and opt instead for integration with HSM.  Also, I wanted to have control of the top post here, to provide updates to the instructions for installation as they are required. This is the raw original driver and application as I had originally intended._

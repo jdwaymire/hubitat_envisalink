@@ -24,7 +24,7 @@
 **********	See Release Notes at the bottom ******************
 ***********************************************************************************************************************/
 
-public static String version()      {  return "v0.13.0"  }
+public static String version()      {  return "v0.14.0"  }
 def boolean isDebug
 
 definition(
@@ -309,6 +309,10 @@ def statusHandler(evt) {
             ifDebug("Sending Arm Home")
             	getChildDevice(state.EnvisalinkDNI).ArmHome()
             	break
+            case "armedNight":
+            ifDebug("Sending Arm Home")
+            	getChildDevice(state.EnvisalinkDNI).ArmHome()
+            	break
             case "disarmed":
             ifDebug("Sending Disarm")
             	getChildDevice(state.EnvisalinkDNI).Disarm()
@@ -323,6 +327,9 @@ private removeChildDevices(delete) {
 
 
 /***********************************************************************************************************************
+* Version: 0.14.0
+*	Added armedNight Handler
+*
 * Version: 0.13.0
 *	Provided Debug switch for less logging if desired.
 *	Moved this list to bottom of file
@@ -339,4 +346,5 @@ private removeChildDevices(delete) {
 *		Creates the Envisalink Connection device and allows definition of Zone Maps, creating virtual contact sensors as child components.
 *		Allows subscription to HSM to mirror the state of HSM to Envisalink (ArmAway, ArmHome, Disarm)
 */
+
 

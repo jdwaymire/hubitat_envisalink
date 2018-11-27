@@ -175,9 +175,8 @@ def createZone(zoneInfo){
     } else {
      	addChildDevice("hubitat", "Virtual Motion Sensor", zoneInfo.deviceNetworkId, [name: zoneInfo.zoneName, isComponent: true, label: zoneInfo.zoneName])   
         newDevice = getChildDevice(zoneInfo.deviceNetworkId)
-        newDevice.updateSetting("autoInactive",[type:"enum", value:0])
+	newDevice.updateSetting("autoInactive",[type:"enum", value:"0"])
     }
-    
 }
 
 def removeZone(zoneInfo){
